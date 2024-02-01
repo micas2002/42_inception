@@ -1,21 +1,23 @@
 FROM debian:bullseye
 
-# Install basic dependencies
-RUN apt-get update
-RUN apt-get install nano -y
-RUN apt-get install curl -y
+# Update system packages
+RUN apt update -y; apt upgrade -y
 
-# incstall nginx
-RUN apt-get install nginx -y
+# Install NginX and OpenSSL
+RUN apt install -y nginx openssl
 
+# Create folder for ssl
 RUN mkdir -p /etc/nginx/ssl
-RUN apt-get install openssl -y
-RUN openssl req -x509 -nodes -out /etc/nginx/ssl/inception.crt -keyout /etc/nginx/ssl/inception.key -subj "/C=PT/ST=Lisboa/L=Lisbon/O=42/OU=42/CN=mibernar.42.fr/UID=mibernar"
 
+# Generate sll key and certificate
+RUN openssl req -x509 -nodes -out /etc/nginx/ssl/inception.crt -keyout /etc/nginx/ssl/inception.key -subj "/C=PT/ST=LIS/L=Lisbon/O=42/OU=mibernar/CN=mibernar.42.fr"
+
+# Create folder for nginx config files
 RUN mkdir -p /var/run/nginx
 
-COPY conf/nginx.conf /etc/nginx/nginx.conf
+COPY /conf/nginx.conf /etc/nginx/nginx.conf
 
+# Give root and user all rights neeeded
 RUN chmod 755 /var/www/html
 RUN chown -R www-data:www-data /var/www/html
 
