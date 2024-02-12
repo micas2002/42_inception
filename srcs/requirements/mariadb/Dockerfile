@@ -6,8 +6,9 @@ RUN apt update -y; apt upgrade -y
 # Install MariaDB
 RUN apt install -y mariadb-server
 
-COPY /conf/50-server.cnf /etc/mysql/mariadb.conf.f/50-server.cnf
+# Allow any network to connect to MariaDB
+RUN sed -i 's/bind-address = 127.0.0.1/bind-address = 0.0.0.0/g' /etc/mysql/mariadb.conf.d/50-server.cnf
 
-COPY /tools/mariadb.sh /
+COPY tools/mariadb.sh /
 
-CMD ["bash", "./mariadb.sh"]
+CMD [ "bash", "mariadb.sh" ]

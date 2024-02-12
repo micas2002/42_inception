@@ -3,22 +3,18 @@ FROM debian:bullseye
 # Update system packages
 RUN apt update -y; apt upgrade -y
 
-# Install NginX and OpenSSL
-RUN apt install -y nginx openssl
+# Install nginx
+RUN apt install -y nginx curl
 
-# Create folder for ssl
-RUN mkdir -p /etc/nginx/ssl
+# Install mkcert tool, for automatic SSL/TSL certificate creation
+RUN curl -JLO "https://dl.filippo.io/mkcert/latest?for=linux/amd64"
+RUN chmod +x mkcert-v*-linux-amd64
+RUN cp mkcert-v*-linux-amd64 /usr/local/bin/mkcert
 
-# Generate sll key and certificate
-RUN openssl req -x509 -nodes -out /etc/nginx/ssl/inception.crt -keyout /etc/nginx/ssl/inception.key -subj "/C=PT/ST=LIS/L=Lisbon/O=42/OU=mibernar/CN=mibernar.42.fr"
+# Create SSL/TSL certificate
+RUN mkcert mibernar.42.fr
+RUN cp mibernar.42.fr* /etc/ssl/certs/
 
-# Create folder for nginx config files
-RUN mkdir -p /var/run/nginx
+COPY ./conf/nginx.conf /etc/nginx/sites-available/
 
-COPY /conf/nginx.conf /etc/nginx/nginx.conf
-
-# Give root and user all rights neeeded
-RUN chmod 755 /var/www/html
-RUN chown -R www-data:www-data /var/www/html
-
-CMD ["nginx", "-g", "daemon off;"]
+CMD [ "nginx", "-g", "daemon off;" ]
