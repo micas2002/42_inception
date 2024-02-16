@@ -1,15 +1,24 @@
-#!/bin/bash
+#!/bin/sh
 
-service mysql start 
+if [ ! -d "/run/mysqld" ]; then
+	mkdir -p /run/mysqld
+	chown -R mysql:mysql /run/mysqld
+fi
 
-echo "CREATE DATABASE IF NOT EXISTS $db1_name ;" > db1.sql
-echo "CREATE USER IF NOT EXISTS '$db1_user'@'%' IDENTIFIED BY '$db1_pwd' ;" >> db1.sql
-echo "GRANT ALL PRIVILEGES ON $db1_name.* TO '$db1_user'@'%' ;" >> db1.sql
-echo "ALTER USER 'root'@'localhost' IDENTIFIED BY '12345' ;" >> db1.sql
-echo "FLUSH PRIVILEGES;" >> db1.sql
+if [ ! -d "/var/lib/mysql/${MYSQL_DATABASE}" ]; then
 
-mysql < db1.sql
+	mysql_install_db --user=mysql --basedir=/usr --datadir=/var/lib/mysql
 
-kill $(cat /var/run/mysqld/mysqld.pid)
+	mysqld -u mysql --bootstrap <<EOF
+		flush privileges;
+		create user '${MYSQL_USER}'@'%' identified by '${MYSQL_PASSWORD}';
+		CREATE DATABASE IF NOT EXISTS ${MYSQL_DATABASE};
+		grant all on ${MYSQL_DATABASE}.* to '${MYSQL_USER}'@'%';
+		delete from mysql.user where user='';
+		delete from mysql.user where user='root';
+		flush privileges;
+EOF
 
-mysqld
+fi
+
+mysqld -u mysql
