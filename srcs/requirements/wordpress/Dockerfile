@@ -1,19 +1,24 @@
-FROM debian:bullseye
+FROM alpine:3.18
 
-# Update system packages
-RUN apt update -y; apt upgrade -y
+# Upgrade system packages and install php and php-fpm
+RUN apk -U upgrade && apk add --no-cache curl php php-fpm
 
-RUN apt install -y php-fpm php-mysql curl
+# Install Wordpress command-line interface
+# RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+# RUN chmod +x wp-cli.phar
+# RUN mv wp-cli.phar /usr/local/bin/wp
 
-COPY /conf/wordpress.conf /etc/php/7.4/fpm/pool.d/www.conf
+# Setup Wordpress config with wordpress.conf file
+COPY /conf/wordpress.conf /etc/php81/php-fpm.d/www.conf
+
+# Copy Wordpress setup script into the root of the container
 COPY /tools/wordpress.sh /
+RUN chmod +x wordpress.sh
 
-RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
-RUN chmod +x wp-cli.phar
-RUN mv wp-cli.phar /usr/local/bin/wp
+# Create user to handle Wordpress
+RUN adduser -S wp-user
 
+# Make container listen on port 9000
 EXPOSE 9000
 
-USER www-data
-
-ENTRYPOINT [ "sh", "/wordpress.sh" ]
+ENTRYPOINT [ "./wordpress.sh" ]

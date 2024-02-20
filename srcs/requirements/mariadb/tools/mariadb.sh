@@ -1,10 +1,12 @@
 #!/bin/sh
 
+# Check if MariaDB is running
 if [ ! -d "/run/mysqld" ]; then
 	mkdir -p /run/mysqld
 	chown -R mysql:mysql /run/mysqld
 fi
 
+# Check if database is created
 if [ ! -d "/var/lib/mysql/${MYSQL_DATABASE}" ]; then
 
 	mysql_install_db --user=mysql --basedir=/usr --datadir=/var/lib/mysql
@@ -18,7 +20,6 @@ if [ ! -d "/var/lib/mysql/${MYSQL_DATABASE}" ]; then
 		delete from mysql.user where user='root';
 		flush privileges;
 EOF
-
 fi
 
 mysqld -u mysql
