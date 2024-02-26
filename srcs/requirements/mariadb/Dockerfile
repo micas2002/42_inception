@@ -1,17 +1,21 @@
-FROM alpine:3.18
+FROM debian:bullseye
 
-# Upgrade system packages and install MariaDB
-RUN apk -U upgrade && apk add --no-cache mariadb mariadb-client
+RUN apt-get update -y && apt-get update -y && \
+	apt-get install -y mariadb-server mariadb-client
 
-# Configure MariaDB with mariadb.conf file
-COPY /conf/mariadb.conf /etc/my.cnf.d/mariadb-server.cnf
+RUN mkdir -p /var/run/mysqld && \
+	chown -R mysql:mysql /var/run/mysqld && \
+	chown -R mysql:mysql /etc/mysql/
 
-# Copy script into container root
-COPY /tools/mariadb.sh /
-RUN chmod +x mariadb.sh
-RUN chown -R 999:999 /var/lib/mysql
+COPY ./tools/run.sh /tmp/
+COPY ./conf/init.sql /tmp/
+COPY ./conf/my.cnf /etc/mysql
 
-# Make container listen on port 3306
-EXPOSE 3306
+RUN chown -R mysql:mysql /tmp/ && \
+	chown -R mysql:mysql /etc/mysql
 
-ENTRYPOINT [ "./mariadb.sh" ]
+EXPOSE  3306
+
+USER mysql
+
+ENTRYPOINT ["sh", "/tmp/run.sh"]
