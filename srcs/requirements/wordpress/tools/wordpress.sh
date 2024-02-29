@@ -1,6 +1,8 @@
 #!/bin/bash
 
 cd /var/www/html
+
+# Check if WordPress is already configured
 if [ ! -e "/var/www/html/wp-config.php" ]; then
 	wp cli update --yes --allow-root
 	wp core download --allow-root
@@ -11,6 +13,6 @@ else
 	echo "installed"
 
 fi
-echo "[Wordpress startup] Starting WordPress fastCGI on port 9000."
+echo "Starting WordPress fastCGI on port 9000."
 
 exec /usr/sbin/php-fpm8.3 -F -R

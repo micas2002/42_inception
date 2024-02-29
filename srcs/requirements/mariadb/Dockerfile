@@ -4,8 +4,8 @@ FROM debian:bullseye
 RUN apt-get update -y && apt-get upgrade -y && \
 	apt-get install -y mariadb-server
 
-# Copy configuration script into container and give execute permissions
-COPY ./conf/mariadb.sh /
+# Copy configuration script into container and give it execute permissions
+COPY ./tools/mariadb.sh /
 RUN chmod +x /mariadb.sh
 
 # Initialize the MariaDB data directory and creates the system tables in the mysql database

@@ -4,6 +4,7 @@ FROM debian:bullseye
 RUN apt-get update -y && apt-get upgrade -y && \
 	apt-get install -y nginx curl
 
+# Create necessary directories for Nginx to run correctly
 RUN mkdir -p /var/www/ /etc/nginx/ssl/ /run/nginx
 
 # Install mkcert tool, for automatic SSL/TLS certificate creation
@@ -17,4 +18,5 @@ RUN mkcert mibernar.42.fr && cp mibernar.42.fr* /etc/nginx/ssl/
 # Copy Nginx config into container
 COPY ./conf/nginx.conf /etc/nginx/conf.d
 
+# Execute Nginx in the foreground
 CMD ["nginx", "-g", "daemon off;"]

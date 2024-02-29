@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# Check if database is already created
 if [ ! -d "/var/lib/mysql/$DB_NAME" ]; then
 
 service mariadb start
