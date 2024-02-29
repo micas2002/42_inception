@@ -1,19 +1,20 @@
 FROM debian:bullseye
 
-RUN apt-get update -y && apt-get update -y && \
+# Update packages and install Nginx
+RUN apt-get update -y && apt-get upgrade -y && \
 	apt-get install -y nginx curl
 
-RUN mkdir -p /etc/nginx/ssl && \
-	mkdir -p /run/nginx && \
-	chown -R www-data /var/lib/nginx && \
-	rm -rf /etc/nginx/sites-available/default
+RUN mkdir -p /var/www/ /etc/nginx/ssl/ /run/nginx
 
-COPY    ./conf/default.conf /etc/nginx/sites-available/default.conf
-COPY    ./conf/nginx.conf /etc/nginx/nginx.conf
-COPY    ./tools/run.sh /tmp/run.sh
+# Install mkcert tool, for automatic SSL/TLS certificate creation
+RUN curl -JLO "https://dl.filippo.io/mkcert/latest?for=linux/amd64" && \
+	chmod +x mkcert-v*-linux-amd64 && \
+	cp mkcert-v*-linux-amd64 /usr/local/bin/mkcert
 
-RUN     ln -s /etc/nginx/sites-available/default.conf /etc/nginx/sites-enabled/default.conf
+# Run mkcert tool
+RUN mkcert mibernar.42.fr && cp mibernar.42.fr* /etc/nginx/ssl/
 
-EXPOSE	443
+# Copy Nginx config into container
+COPY ./conf/nginx.conf /etc/nginx/conf.d
 
-ENTRYPOINT [ "sh", "/tmp/run.sh" ]
+CMD ["nginx", "-g", "daemon off;"]

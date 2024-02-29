@@ -1,21 +1,21 @@
 FROM debian:bullseye
 
-RUN apt-get update -y && apt-get update -y && \
-	apt-get install -y mariadb-server mariadb-client
+# Update packages and install MariaDB
+RUN apt-get update -y && apt-get upgrade -y && \
+	apt-get install -y mariadb-server
 
-RUN mkdir -p /var/run/mysqld && \
-	chown -R mysql:mysql /var/run/mysqld && \
-	chown -R mysql:mysql /etc/mysql/
+# Copy configuration script into container and give execute permissions
+COPY ./conf/mariadb.sh /
+RUN chmod +x /mariadb.sh
 
-COPY ./tools/run.sh /tmp/
-COPY ./conf/init.sql /tmp/
-COPY ./conf/my.cnf /etc/mysql
+# Initialize the MariaDB data directory and creates the system tables in the mysql database
+RUN mysql_install_db
 
-RUN chown -R mysql:mysql /tmp/ && \
-	chown -R mysql:mysql /etc/mysql
+# Make container listen on port 3306
+EXPOSE 3306
 
-EXPOSE  3306
+# Execute script
+ENTRYPOINT ["/mariadb.sh"]
 
-USER mysql
-
-ENTRYPOINT ["sh", "/tmp/run.sh"]
+# Recomended way to start MariaDB
+CMD ["mysqld_safe", "--bind-address=0.0.0.0"]
