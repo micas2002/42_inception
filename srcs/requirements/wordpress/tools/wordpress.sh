@@ -15,4 +15,4 @@ else
 fi
 echo "Starting WordPress fastCGI on port 9000."
 
-exec /usr/sbin/php-fpm8.3 -F -R
+exec /usr/sbin/php-fpm7.4 -F -R
