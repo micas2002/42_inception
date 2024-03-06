@@ -1,6 +1,6 @@
 FROM debian:bullseye
 
-# # Update packages and install WordPress recomended resources
+# Update packages and install WordPress recomended resources
 RUN apt-get update -y && apt-get upgrade -y && \
 	apt-get install -y wget curl unzip php7.4 \
     php7.4-fpm php7.4-mysql php7.4-curl php7.4-gd \
