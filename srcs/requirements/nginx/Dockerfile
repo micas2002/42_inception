@@ -1,22 +1,25 @@
 FROM debian:bullseye
 
-# Install basic dependencies
-RUN apt-get update
-RUN apt-get install nano -y
-RUN apt-get install curl -y
+# Update packages and install Nginx
+RUN apt-get update -y && apt-get upgrade -y && \
+	apt-get install -y nginx curl
 
-# incstall nginx
-RUN apt-get install nginx -y
+# Create necessary directories for Nginx to run correctly
+RUN mkdir -p /var/www/ /etc/nginx/ssl/ /run/nginx
 
-RUN mkdir -p /etc/nginx/ssl
-RUN apt-get install openssl -y
-RUN openssl req -x509 -nodes -out /etc/nginx/ssl/inception.crt -keyout /etc/nginx/ssl/inception.key -subj "/C=PT/ST=Lisboa/L=Lisbon/O=42/OU=42/CN=mibernar.42.fr/UID=mibernar"
+# Install mkcert tool, for automatic SSL/TLS certificate creation
+RUN curl -JLO "https://dl.filippo.io/mkcert/latest?for=linux/amd64" && \
+	chmod +x mkcert-v*-linux-amd64 && \
+	cp mkcert-v*-linux-amd64 /usr/local/bin/mkcert
 
-RUN mkdir -p /var/run/nginx
+# Run mkcert tool
+RUN mkcert mibernar.42.fr && cp mibernar.42.fr* /etc/nginx/ssl/
 
-COPY conf/nginx.conf /etc/nginx/nginx.conf
+# Copy Nginx config into container
+COPY ./conf/nginx.conf /etc/nginx/conf.d
 
-RUN chmod 755 /var/www/html
-RUN chown -R www-data:www-data /var/www/html
+# Make container listen on port 443
+EXPOSE 443
 
+# Execute Nginx in the foreground
 CMD ["nginx", "-g", "daemon off;"]
