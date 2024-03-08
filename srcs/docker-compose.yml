@@ -50,13 +50,13 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: /home/inception/data/mysql
+      device: /home/mibernar/inception/data/mysql
       o: bind
   wp:
     driver: local
     driver_opts:
       type: none
-      device: /home/inception/data/wordpress
+      device: /home/mibernar/inception/data/wordpress
       o: bind
 
 networks:

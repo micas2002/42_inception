@@ -18,5 +18,8 @@ RUN mkcert mibernar.42.fr && cp mibernar.42.fr* /etc/nginx/ssl/
 # Copy Nginx config into container
 COPY ./conf/nginx.conf /etc/nginx/conf.d
 
+# Make container listen on port 443
+EXPOSE 443
+
 # Execute Nginx in the foreground
 CMD ["nginx", "-g", "daemon off;"]
